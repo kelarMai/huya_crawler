@@ -1,28 +1,22 @@
 import pymysql
-
-host = 'localhost'
-port = 3306
-username = 'kelar'
-userpassword = '123456'
-database = 'huya_crawler'
-
-
-
-create_data_base = '''
-
-'''
+import MysqlConstantImformation
 
 class MysqlManipulate():
-    __host = host
-    __port = port
-    __database = database
-    __username = username
-    __userpassword = userpassword
+    __host = MysqlConstantImformation.host
+    __port = MysqlConstantImformation.port
+    __database = MysqlConstantImformation.database
+    __username = MysqlConstantImformation.username
+    __userpassword = MysqlConstantImformation.userpassword
     
     def __init__(self):
         self.db = None
-
+        self.cursor = None
         pass
+
+    def __delattr__(self):
+        if self.db != None:
+            self.db.close()
+            self.db = None
 
     @staticmethod
     def changeUserInformation(newname = None,newpassword = None,port = None,database = None):
@@ -54,7 +48,41 @@ class MysqlManipulate():
 
 
     def connectDataBase(self):
-        db = pymysql.connect(user=MysqlManipulate.__username , password = MysqlManipulate.__userpassword , port = MysqlManipulate.__port , database = MysqlManipulate.__database)
-
+        self.db = pymysql.connect(user=MysqlManipulate.__username , password = MysqlManipulate.__userpassword , host = MysqlManipulate.__host,database = MysqlManipulate.__database)
+        # , port = MysqlManipulate.__port
         pass
+
+    def getCursor(self):
+        if self.db == None:
+            self.connectDataBase()
+        if self.cursor == None:
+            self.cursor = self.db.cursor()
+        return self.cursor
+    
+    def killCurosr(self):
+        self.cursor.close()
+        self.cursor = None
+    
+    # def tempExecuteSqlCommand(self,command_type,command = "",*args = ()):
+    #     '''
+    #     临时的数据库操作接口；这里得分割为多个命令形式
+    #     :param command_type: 什么类型命令 select,insert,select,updata等？
+    #     :param command: 数据库操作命令，字符串
+    #     :param *args:命令中的参数，元组形式
+    #     '''
+    #     if self.db == None:
+    #         self.connectDataBase()
+    #     with self.db:
+    #         with self.db.cursor() as cursor:
+    #             cursor.execute(command.format(args))
+    #         # self.db.commit()
+    
+    def executeSqlCommand(self,command = ""):
+        cursor = self.getCursor()
+        cursor.execute(command)
+        data = cursor.fetchone()
+        return data
+
+
+
 
