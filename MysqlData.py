@@ -1,22 +1,22 @@
 import pymysql
-import MysqlConstantImformation
+import MysqlConfigue
 
 class MysqlManipulate():
-    __host = MysqlConstantImformation.host
-    __port = MysqlConstantImformation.port
-    __database = MysqlConstantImformation.database
-    __username = MysqlConstantImformation.username
-    __userpassword = MysqlConstantImformation.userpassword
+    __host = MysqlConfigue.host
+    __port = MysqlConfigue.port
+    __database = MysqlConfigue.database
+    __username = MysqlConfigue.username
+    __userpassword = MysqlConfigue.userpassword
     
     def __init__(self):
-        self.db = None
-        self.cursor = None
+        self.__db = None
+        self.__cursor = None
         pass
 
-    def __delattr__(self):
-        if self.db != None:
-            self.db.close()
-            self.db = None
+    def __del__(self):
+        self.killCurosr()
+        self.clossDataBase()        
+            
 
     @staticmethod
     def changeUserInformation(newname = None,newpassword = None,port = None,database = None):
@@ -48,41 +48,63 @@ class MysqlManipulate():
 
 
     def connectDataBase(self):
-        self.db = pymysql.connect(user=MysqlManipulate.__username , password = MysqlManipulate.__userpassword , host = MysqlManipulate.__host,database = MysqlManipulate.__database)
-        # , port = MysqlManipulate.__port
+        self.__db = pymysql.connect(user=MysqlManipulate.__username , password = MysqlManipulate.__userpassword , host = MysqlManipulate.__host)
+        cursor = self.getCursor()
+        try:
+            cursor.execute("use {0};".format(MysqlManipulate.__database))
+        except Exception as e:
+            if e[0] == 1049:
+                ## 没有该数据库
+                create_database_sql = r" create database if not exists HuyaCrawler; "
+                create_talbe_sql = MysqlConfigue.TableConfig
+                cursor.execute(create_database_sql)
+                cursor.execute(create_talbe_sql)
+                self.__db.commit()
         pass
 
+    def clossDataBase(self):
+        if self.__db != None:
+            self.__db.close()
+            self.__db = None
+
     def getCursor(self):
-        if self.db == None:
+        if self.__db == None:
             self.connectDataBase()
-        if self.cursor == None:
-            self.cursor = self.db.cursor()
-        return self.cursor
+        if self.__cursor == None:
+            self.__cursor = self.__db.cursor()
+        return self.__cursor
     
     def killCurosr(self):
-        self.cursor.close()
-        self.cursor = None
+        if self.__cursor != None:
+            self.__cursor.close()
+            self.__cursor = None
     
-    # def tempExecuteSqlCommand(self,command_type,command = "",*args = ()):
-    #     '''
-    #     临时的数据库操作接口；这里得分割为多个命令形式
-    #     :param command_type: 什么类型命令 select,insert,select,updata等？
-    #     :param command: 数据库操作命令，字符串
-    #     :param *args:命令中的参数，元组形式
-    #     '''
-    #     if self.db == None:
-    #         self.connectDataBase()
-    #     with self.db:
-    #         with self.db.cursor() as cursor:
-    #             cursor.execute(command.format(args))
-    #         # self.db.commit()
+    def tempExecuteSqlCommand(self,command_type,command = "",*args):
+        '''
+        临时的数据库操作接口；这里得分割为多个命令形式
+        :param command_type: 什么类型命令 select,insert,select,updata 等？
+        :param command: 数据库操作命令，字符串
+        :param *args:命令中的参数，元组形式
+        '''
+        if self.__db == None:
+            self.connectDataBase()
+        with self.__db:
+            with self.__db.__cursor() as __cursor:
+                __cursor.execute(command.format(args))
+            # self.__db.commit()
     
-    def executeSqlCommand(self,command = ""):
-        cursor = self.getCursor()
-        cursor.execute(command)
-        data = cursor.fetchone()
+    def executeSqlCommand(self,commandObject):
+        if commandObject.getSqlType == ""
+
+
+        __cursor = self.getCursor()
+        __cursor.execute(command)
+        data = __cursor.fetchone()
         return data
 
 
 
+## test
 
+a = MysqlManipulate()
+a.connectDataBase()

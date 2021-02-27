@@ -1,6 +1,8 @@
 定位：
-1. 主播名字 class="host-title"
-2. 订阅数 class="subscribe-count"
-3. 周贡献榜 class="amout--3wmqSTWkxf57qPXtinLynw"
-4. 工会名称 class="union-name"
-5. 主播类别 class="host-spl clickstat" 
+直播间名字 class="host-title"
+主播id class="host-rid"
+主播名称 class="host-name"
+订阅数 class="subscribe-count"
+周贡献榜 class="amout--3wmqSTWkxf57qPXtinLynw"
+工会名称 class="union-name"
+主播类别 class="host-spl clickstat" 
