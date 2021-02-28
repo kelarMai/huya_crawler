@@ -49,17 +49,19 @@ class MysqlManipulate():
 
     def connectDataBase(self):
         self.__db = pymysql.connect(user=MysqlManipulate.__username , password = MysqlManipulate.__userpassword , host = MysqlManipulate.__host)
-        cursor = self.getCursor()
-        try:
-            cursor.execute("use {0};".format(MysqlManipulate.__database))
-        except Exception as e:
-            if e[0] == 1049:
-                ## 没有该数据库
-                create_database_sql = r" create database if not exists HuyaCrawler; "
-                create_talbe_sql = MysqlConfigue.TableConfig
-                cursor.execute(create_database_sql)
-                cursor.execute(create_talbe_sql)
-                self.__db.commit()
+        with self.__db.cursor() as cursor:
+            try:
+                cursor.execute("use {0};".format(MysqlManipulate.__database))
+            except Exception as e:
+                # print(type(e.args))
+                if e.args[0] == 1049:
+                    ## 没有该数据库
+                    create_database_sql = " create database if not exists {0}; ".format(MysqlManipulate.__database)
+                    cursor.execute(create_database_sql)
+                    cursor.execute("use {0};".format(MysqlManipulate.__database))
+                    for table_configue in dir(MysqlConfigue):
+                        if "TableConfig" in table_configue:
+                            cursor.execute(getattr( MysqlConfigue,table_configue))
         pass
 
     def clossDataBase(self):
@@ -89,22 +91,22 @@ class MysqlManipulate():
         if self.__db == None:
             self.connectDataBase()
         with self.__db:
-            with self.__db.__cursor() as __cursor:
-                __cursor.execute(command.format(args))
+            with self.__db.cursor() as cursor:
+                cursor.execute(command.format(args))
             # self.__db.commit()
     
     def executeSqlCommand(self,commandObject):
-        if commandObject.getSqlType == ""
+        if commandObject.getSqlType == "":
+            pass
 
 
-        __cursor = self.getCursor()
-        __cursor.execute(command)
-        data = __cursor.fetchone()
+        cursor = self.getCursor()
+        cursor.execute(command)
+        data = cursor.fetchone()
         return data
-
-
 
 ## test
 
 a = MysqlManipulate()
 a.connectDataBase()
+

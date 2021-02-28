@@ -6,17 +6,19 @@ userpassword = '123456'
 database = '123testforfalse'
 database = 'HuyaCrawler'
 
-TableConfig = '''
+TableConfig0 = r"""
 create table if not exists huya_anchor_info
 (
-anchor_id primary key mediumint,
+anchor_id mediumint primary key,
 anchor_name char(25) not null,
 subscriber_number int default 0,
 clan_name char(20) default ''
 );
+"""
+TableConfig1 = r"""
 create table if not exists huya_anchor_weekly_income
 (
-anchor_id primary key mediumint,
+anchor_id mediumint primary key,
 weekly_income0 mediumint unsigned default 0,
 weekly_income1 mediumint unsigned default 0,
 weekly_income2 mediumint unsigned default 0,
@@ -70,7 +72,7 @@ weekly_income49 mediumint unsigned default 0,
 weekly_income50 mediumint unsigned default 0,
 constraint foreign key(anchor_id) references huya_anchor_info(anchor_id)
 ) ;
-'''
+"""
 
 class EnumCommand():
     def __init__(self):
