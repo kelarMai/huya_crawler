@@ -3,7 +3,6 @@ host = '127.0.0.1'
 port = 3306
 username = 'kelar'
 userpassword = '123456'
-database = '123testforfalse'
 database = 'HuyaCrawler'
 
 TableConfig0 = r"""

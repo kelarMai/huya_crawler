@@ -6,3 +6,5 @@
 周贡献榜 class="amout--3wmqSTWkxf57qPXtinLynw"
 工会名称 class="union-name"
 主播类别 class="host-spl clickstat" 
+
+分类界面的直播间 class="video-info "

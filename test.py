@@ -1,11 +1,10 @@
-import base64
+# a = "123"
+# a += "456"
+# print(a[0:-1])
 
-test = MysqlManipulate()
-sql_command = '''
-select picture from staff where staff_id=1;
-'''
 
-pictureData = test.executeSqlCommand(sql_command)
-picture = base64.b64decode(pictureData[0])
-with open("new.jpg",'wb') as fb:
-    fb.write(picture)
+## format 只能用在 "{}".format 的形式
+a = "ssndlf {0},{1}".format(2,3)
+b = "{0},{1}"
+b.format(4,5)
+print(a,b)
