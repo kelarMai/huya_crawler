@@ -8,17 +8,19 @@ database = 'HuyaCrawler'
 TableConfig0 = r"""
 create table if not exists huya_anchor_info
 (
-anchor_id mediumint primary key,
+anchor_id mediumint unsigned primary key,
 anchor_name char(25) not null,
 subscriber_number int default 0,
-clan_name char(20) default ''
+clan_name char(20) default '',
+live_firse_class char(10) default '',
+live_second_class char(10) default ''
 );
 """
 TableConfig1 = r"""
 create table if not exists huya_anchor_weekly_income
 (
-anchor_id mediumint primary key,
-weekly_income0 mediumint unsigned default 0,
+anchor_id_with_date char(25) primary key,
+anchor_id mediumint unsigned ,
 weekly_income1 mediumint unsigned default 0,
 weekly_income2 mediumint unsigned default 0,
 weekly_income3 mediumint unsigned default 0,

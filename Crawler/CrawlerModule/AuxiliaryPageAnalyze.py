@@ -2,6 +2,8 @@ import re
 import requests
 import time
 
+from .AnchorInform import AnchorInform
+
 def getAllScriptCode(test_string = None):
     '''
     把分类界面中的 script javascript 文件的链接都找出来
@@ -19,8 +21,8 @@ def getAllScriptCode(test_string = None):
         # print(script_url_list)
     return script_url_list
 
-url_list = getAllScriptCode()
-print(len(url_list))
+# url_list = getAllScriptCode()
+# print(len(url_list))
 
 def downScript(script_url_list):
     '''
@@ -48,16 +50,22 @@ def downOneurl(script_url,write_file):
     with open(write_file,'w',encoding='utf-8') as f:
         f.write(response_page_object.text)
 
-def writeDownTheUrlsName(list_write_down,write_file):
+def writeDownTheUrlsName(list_write_down,write_file,append = False):
     '''
     写入元组/数组到文件中
     :param list_write_down: 元组/数组
     :param write_file: 写入的文件
     '''
-    with open(write_file,'a',encoding='utf-8') as f:
-        for row in list_write_down:
-            f.write(row)
-            f.write('\n')
+    if append == False:
+        with open(write_file,'a',encoding='utf-8') as f:
+            for row in list_write_down:
+                f.write(row)
+                f.write('\n')
+    else :
+        with open(write_file,'w',encoding='utf-8') as f:
+            for row in list_write_down:
+                f.write(row)
+                f.write('\n')
 
 
 ## 现在因为暂时没有办法（不想去学）获取分类界面下一页的内容，就先每个界面手动获取
@@ -66,7 +74,7 @@ def getUrlFromEachHallPage(hall_page_file,write_file):
     '''
     从每个大厅页面中获取每个直播间的链接
     :param hall_page_file: 大厅的代码，暂时只能自己从浏览器中复制出来
-    :param write_file: 或许到的链接写入到的文件
+    :param write_file: 获取到的链接id写入到的文件
     '''
     with open(hall_page_file,'r',encoding='utf-8') as page_file:
         pattern = re.compile(r'<a href="https://www\.huya\.com/(\w*?)" class="video-info' )
@@ -82,74 +90,89 @@ def getUrlFromEachHallPage(hall_page_file,write_file):
 
 # getUrlFromEachHallPage(r'./虎牙直播分类界面信息示例.txt',r'./CrawlerModule/huya_anchor_live_links.txt')
 
-class AnchorInform():
-    def __init__(self):
-        self.anchor_id = None      
-        self.anchor_name = None
-        self.subscriber_number = None
-        self.clan = None
-        # 一级分类
-        self.live_first_class = None 
-        self.live_second_clsss = None
-        self.anchor_weekly_income = None
-
-    def showAllInform(self):
-        print(self.anchor_id,self.anchor_name,self.subscriber_number,self.clan,self.live_first_class,self.live_second_clsss,self.anchor_weekly_income)
-
-def fromUrlsGetLiveHousePage(url_index_save_file):
-    url_index_list = None
-    with open(url_index_save_file,'r',encoding='utf-8') as url_index_file:
-        url_index_list = url_index_file.readlines()
-    url_index_list = list(set(url_index_list))      ##去重
-    url_list = [f"https://www.huya.com/{url_index}" for url_index in url_index_list]
-
-    for url in url_list:
-        response_page_object = requests.get(url)
-        extractAndSaveLiveHouseInform(response_page_object.text)
-
-
 def extractAndSaveLiveHouseInform(page_file):
     anchor = AnchorInform()
+    try:
+        ## ID
+        pattern = re.compile(r'class="host-rid">\S+?(\d+)</')
+        search_result = re.search(pattern,page_file)
+        if search_result != None:
+            anchor.anchor_id = int(search_result.group(1))
+        
+        ## name
+        pattern = re.compile(r'class="host-name" title="(.*?)">')
+        search_result = re.search(pattern,page_file)
+        if search_result != None:
+            anchor.anchor_name = search_result.group(1)
+        
+        ## subscriber_numbers
+        pattern = re.compile(r'class="subscribe-count".*?>(\d+)</')
+        search_result = re.search(pattern,page_file)
+        if search_result != None:
+            anchor.subscriber_number = int(search_result.group(1))
+        
+        ## weekly_donation
+        pattern = re.compile(r'class="amout--[\w]+">([\d,]+)</')
+        search_result = re.findall(pattern,page_file)
+        if search_result != None:
+            anchor.anchor_weekly_income = [int(i.replace(',','')) for i in search_result]
+        
+        ## anchor_clan
+        pattern = re.compile(r'class="union-name">(.*?)</')
+        search_result = re.search(pattern,page_file)
+        if search_result != None:
+            anchor.clan = search_result.group(1)
+        
+        ## anchor_class
+        pattern = re.compile(r'class="host-spl clickstat".*?>(.*?)<')
+        search_result = re.findall(pattern,page_file)
+        if search_result != None:
+            anchor.live_first_class = search_result[0]
+            anchor.live_second_clsss = search_result[1]
+        
+        print("extractAndSaveLiveHouseInform:")
+        print(anchor.anchor_name)
+    except Exception as e:
+        print("Error: extractAndSaveLiveHouseInform,",e)
 
-    ## ID
-    pattern = re.compile(r'class="host-rid">\S+?(\d+)</')
-    search_result = re.search(pattern,page_file)
-    if search_result != None:
-        anchor.anchor_id = int(search_result.group(1))
-    
-    ## name
-    pattern = re.compile(r'class="host-name" title="(.*?)">')
-    search_result = re.search(pattern,page_file)
-    if search_result != None:
-        anchor.anchor_name = search_result.group(1)
-    
-    ## subscriber_numbers
-    pattern = re.compile(r'class="subscribe-count".*?>(\d+)</')
-    search_result = re.search(pattern,page_file)
-    if search_result != None:
-        anchor.subscriber_number = int(search_result.group(1))
-    
-    ## weekly_donation
-    pattern = re.compile(r'class="amout--[\w]+">([\d,]+)<')
-    search_result = re.findall(pattern,page_file)
-    if search_result != None:
-        anchor.anchor_weekly_income = [int(i.replace(',','')) for i in search_result]
-    
-    ## anchor_clan
-    pattern = re.compile(r'class="union-name">(.*?)</')
-    search_result = re.search(pattern,page_file)
-    if search_result != None:
-        anchor.clan = search_result.group(1)
-    
-    ## anchor_class
-    pattern = re.compile(r'class="host-spl clickstat".*?>(.*?)<')
-    search_result = re.findall(pattern,page_file)
-    if search_result != None:
-        anchor.live_first_class = search_result[0]
-        anchor.live_second_clsss = search_result[1]
-    
-    
+    return anchor
 
-## test
-with open(r'./虎牙直播直播间内代码示例.txt','r',encoding='utf-8') as page_file:
-    extractAndSaveLiveHouseInform(page_file.read())
+
+def fromUrlsGetAnchorInform(url_index_save_file):
+    url_index_list = {}
+    with open(url_index_save_file,'r',encoding='utf-8') as url_index_file:
+        for url_index in url_index_file.readlines():
+            url_index = url_index.replace('\n', '').replace('\r', '')
+            url_index_list[url_index] = None
+    ##去重
+    try:
+        url_index_list = list(url_index_list.keys())
+    except Exception as e:
+        print("Error: fromUrlsGetAnchorInform,",e)
+    ## 重新写入文件
+
+    writeDownTheUrlsName(url_index_list,url_index_save_file,True)
+    url_list = [f"https://www.huya.com/{url_index}" for url_index in url_index_list]
+
+    # 从直播间获取主播的信息
+    # 一次获取10个直播间信息，获取一次休息0.5s
+    anchor_inform_list = []
+    i = 1
+    j = 0
+    for url in url_list:
+        print("fromUrlsGetAnchorInform: ")
+        print(url)
+        response_page_object = requests.get(url)
+        
+        ## 测试时，查看下载的 html 代码
+        # with open("./temp_file.txt",'w',encoding='utf-8') as f:
+        #     f.write(response_page_object.text)
+        
+        anchor_inform_list.append( extractAndSaveLiveHouseInform(response_page_object.text) )
+        if i % 5 == 0:
+            time.sleep(0.5)
+        i +=1
+        if i > j:
+            break
+    
+    return anchor_inform_list

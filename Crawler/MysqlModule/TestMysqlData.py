@@ -1,7 +1,8 @@
-import MysqlData
+from . import MysqlData as MysqlData
 
-testObject = MysqlData.MysqlManipulate()
-testObject.connectDataBase()
+# testObject = MysqlData.MysqlManipulate()
+# testObject.connectDataBase()
+# testObject.createTable(testObject.getCursor())
 
 ## 命令执行测试
 # try:
@@ -16,13 +17,12 @@ testObject.connectDataBase()
 
 
 ## insert datas
-try:
-    ## 一次插入多条数据
-    affect_rows_number = testObject.insertManyDatas('huya_anchor_info',((1,'4',2,'5'),(3,"5",5,"46")))
-    print(affect_rows_number)
-except Exception as e:
-    print(e)
-
+# try:
+#     ## 一次插入多条数据
+#     affect_rows_number = testObject.insertManyDatas('huya_anchor_info','(%d,"%s",%d,%s),',((1,'4',2,'5'),(3,"5",5,"46")))
+#     print(affect_rows_number)
+# except Exception as e:
+#     print(e)
 
 
 

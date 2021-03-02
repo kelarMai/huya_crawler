@@ -1,5 +1,6 @@
 import pymysql
-import MysqlConfigue
+from . import MysqlConfigue as MysqlConfigue
+
 
 class MysqlManipulate():
     __host = MysqlConfigue.host
@@ -135,19 +136,25 @@ class MysqlManipulate():
                     self.__db.commit()
                     return affect_rows_number
 
-    def insertManyDatas(self,tabel_name,data_tuples = None):
+    def insertManyDatas(self,tabel_name,data_format = '',datas_tuple = None):
         '''
         :param table_name 表名
-        :param data_tuples 二维元组数据
+        :param data_format:用来格式化的字符串 类似 '(%d,"%s",%d,%s),' 
+        :param datas_tuple 二维元组数据 类似：[(anchor_id,anchor_name,subscriber_number,clan_name,live_firse_class,live_second_class)]
+
         '''
         datas_string = ""
-        data_format = '(%d,"%s",%d,%s),'
         data_string = None
-        for data_tuple in data_tuples:
-            data_string = data_format % data_tuple
-            datas_string += data_string
-        datas_string = datas_string[:-1]
-        insert_command = "insert into {0} values {1};".format(tabel_name,datas_string)
-        print(insert_command)
-        return self.executeSqlCommand('insert',insert_command)
-
+        data_error = None
+        try:
+            for data_tuple in datas_tuple:
+                data_error = data_tuple
+                data_string = data_format % data_tuple
+                datas_string += data_string
+            datas_string = datas_string[:-1]
+            insert_command = "insert into {0} values {1};".format(tabel_name,datas_string)
+            print(insert_command)
+            return self.executeSqlCommand('insert',insert_command)
+        except TypeError as e:
+            print("Error: MysqlData.MysqlManipulate.insertManyDatas: ",e)
+            print(data_error,'\n',data_format)
